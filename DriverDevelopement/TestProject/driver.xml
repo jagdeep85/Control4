@@ -1,0 +1,82 @@
+<devicedata>
+  <version>1</version>
+  <manufacturer>RollingRock</manufacturer>
+  <model>TestModel</model>
+  <search_type>c4:av_gen</search_type>
+  <creator>jagdeep@live.ca</creator>
+  <name>SampleHTTP</name>
+  <small>devices_sm/C4.gif</small>
+  <large>devices_lg/C4.gif</large>
+  <control>lua_gen</control>
+  <controlmethod>ip</controlmethod>
+  <driver>DriverWorks</driver>
+  <copyright>Copyright 2004-2014 Control4 Corporation.  All rights reserved.</copyright>
+  <created></created>
+  <modified></modified>
+  <proxies qty="1">
+    <proxy>tv</proxy>
+  </proxies>
+  <config>
+    <script></script>
+    <actions />
+  </config>
+   <properties>
+        <property>
+            <name>Host</name>
+            <type>STRING</type>
+            <default>192.168.1.100</default>
+            <readonly>false</readonly>
+        </property>
+        <property>
+            <name>Port</name>
+            <type>INTEGER</type>
+            <default>5000</default>
+            <readonly>false</readonly>
+        </property>
+        <property>
+            <name>EnableDebug</name>
+            <type>BOOLEAN</type>
+            <default>false</default>
+            <readonly>false</readonly>
+        </property>
+    </properties>
+
+    <!-- Commands -->
+    <commands>
+        <command>
+            <name>PING</name>
+            <description>Sends a PING message to the TCP server</description>
+        </command>
+        <command>
+            <name>CUSTOM</name>
+            <description>Sends custom data to the TCP server</description>
+            <parameters>
+                <parameter>
+                    <name>Data</name>
+                    <type>STRING</type>
+                </parameter>
+            </parameters>
+        </command>
+    </commands>
+
+    <!-- Capabilities -->
+    <capabilities>
+        <capability>network</capability>
+        <capability>lua</capability>
+    </capabilities>
+
+    <!-- Bindings -->
+    <bindings>
+        <binding>
+            <id>5001</id>
+            <type>CONTROL</type>
+            <description>Main Control Binding</description>
+        </binding>
+    </bindings>
+
+    <!-- Files -->
+    <files>
+        <name>driver.lua</name>
+            <type>lua</type>
+    </files>
+</devicedata>

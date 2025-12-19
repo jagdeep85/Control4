@@ -1,0 +1,5 @@
+﻿<Driver type="c4z" name="TestProject">
+ <Items>
+  <Item type="file" name="driver.xml" />
+ </Items>
+</Driver>
