@@ -1,0 +1,126 @@
+<devicedata>
+  <name>Sample TCP Driver</name>
+  <creator>Jagdeep Matharu</creator>
+  <manufacturer>Jagdeep Matharu</manufacturer>
+  <model>HTTP-TCP</model>
+  <driver>DriverWorks</driver>
+  <control>lua_gen</control>
+  <version>7</version>
+  <modified>2024-06-10T12:00:00Z</modified>
+  <description>Control4 driver with TCP socket and user-configurable fields.</description>
+  <driverType>lua</driverType>
+  <protocol>tcp</protocol>
+  <composer_categories>
+    <category>Network</category>
+  </composer_categories>
+  <config>
+    <properties>
+      <property>
+        <name>API URL</name>
+        <type>STRING</type>
+        <default>http://192.168.1.100:8080</default>
+        <description>The base URL of the API endpoint</description>
+      </property>
+      <property>
+        <name>API Key</name>
+        <type>STRING</type>
+        <default></default>
+        <description>Authentication API key</description>
+      </property>
+      <property>
+        <n>Request Timeout</n>
+        <type>NUMBER</type>
+        <default>30</default>
+        <description>HTTP request timeout in seconds</description>
+      </property>
+      <property>
+        <name>Enabled</name>
+        <type>LIST</type>
+        <default>true</default>
+        <listItems>
+          <item>true</item>
+          <item>false</item>
+        </listItems>
+        <description>Enable or disable the driver</description>
+      </property>
+      <property>
+        <n>Polling Interval</n>
+        <type>NUMBER</type>
+        <default>60</default>
+        <description>Polling interval in seconds</description>
+      </property>
+      <property>
+        <n>Retry Count</n>
+        <type>NUMBER</type>
+        <default>3</default>
+        <description>Number of retry attempts for failed connections</description>
+      </property>
+      <property>
+        <n>Retry Delay</n>
+        <type>NUMBER</type>
+        <default>5</default>
+        <description>Delay between retry attempts in seconds</description>
+      </property>
+      <property>
+        <name>New Property 1</name>
+        <type>STRING</type>
+      </property>
+    </properties>
+    <commands>
+      <command>
+        <name>PING</name>
+        <description>Sends a PING message to the TCP server</description>
+      </command>
+      <command>
+        <name>SEND_CUSTOM</name>
+        <description>Sends the CustomMessage property to the TCP server</description>
+      </command>
+    </commands>
+    <power_management_method>AlwaysOn</power_management_method>
+    <power_delay>0</power_delay>
+    <power_command_delay>0</power_command_delay>
+    <power_command_needed>False</power_command_needed>
+  </config>
+  <bindings>
+    <binding>
+      <id>5001</id>
+      <type>CONTROL</type>
+      <description>Main Control Binding</description>
+    </binding>
+  </bindings>
+  <connections>
+    <connection>
+      <id>6001</id>
+      <type>TCP</type>
+      <connectionname>TCP Connection</connectionname>
+      <autobind>true</autobind>
+    </connection>
+    <connection>
+      <id>5000</id>
+      <connectionname>avswitch</connectionname>
+      <facing>6</facing>
+      <type>2</type>
+      <consumer>false</consumer>
+      <audiosource>false</audiosource>
+      <videosource>false</videosource>
+      <linelevel>false</linelevel>
+      <classes>
+        <class>
+          <classname>AVSWITCH</classname>
+        </class>
+      </classes>
+    </connection>
+  </connections>
+  <files>
+    <file>
+      <name>driver.lua</name>
+      <type>lua</type>
+    </file>
+  </files>
+  <copyright>OPEn Source</copyright>
+  <controlmethod>ip</controlmethod>
+  <proxies qty="">
+    <proxy proxybindingid="5000">avswitch</proxy>
+  </proxies>
+  <created>11/06/2025 7:33 PM</created>
+</devicedata>
