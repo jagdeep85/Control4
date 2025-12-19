@@ -18,7 +18,7 @@
     <properties>
       <property>
         <name>MAC</name>
-        <default>C8:D3:FF:B3:FE:50</default>
+        <default>C8D3FFB3FE50</default>
         <type>STRING</type>
         <readonly>false</readonly>
       </property>
@@ -30,7 +30,7 @@
       </property>
       <property>
         <name>Port</name>
-        <default></default>
+        <default>9</default>
         <type>STRING</type>
         <readonly>false</readonly>
       </property>
