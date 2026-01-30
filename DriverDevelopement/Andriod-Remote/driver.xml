@@ -1,0 +1,1084 @@
+<devicedata>
+  <copyright>Copyright 2025 Snap One, LLC. All rights reserved.</copyright>
+  <creator>Jagdeep Matharu</creator>
+  <manufacturer>Android TV</manufacturer>
+  <name>Android Player</name>
+  <model>Formular</model>
+  <created>06/20/2025 15:30</created>
+  <modified>10/13/2025 13:30</modified>
+  <version>2</version>
+  <control>lua_gen</control>
+  <driver>DriverWorks</driver>
+  <auto_update>true</auto_update>
+  <minimum_os_version>2.8.2</minimum_os_version>
+  <small image_source="c4z">icons/device_sm.png</small>
+  <large image_source="c4z">icons/device_lg.png</large>
+  <proxies>
+    <proxy proxybindingid="5001" name="Android Apps" image_source="c4z"
+      small_image="icons/apps_sm.png" large_image="icons/apps_lg.png">media_service</proxy>
+    <proxy proxybindingid="5002" name="Android" image_source="c4z" small_image="icons/device_sm.png"
+      large_image="icons/device_lg.png">media_player</proxy>
+    <proxy proxybindingid="5003" name="Android App Switcher">avswitch</proxy>
+  </proxies>
+  <config>
+    <script jit="1" file="driver.lua" />
+    <documentation file="www/documentation/index.html" />
+    <properties>
+      <property>
+        <name>Driver Version</name>
+        <default>2</default>
+        <type>STRING</type>
+        <readonly>true</readonly>
+      </property>
+      <property>
+        <name>Device IP</name>
+        <type>STRING</type>
+        <default>192.168.1.64</default>
+      </property>
+      <property>
+        <name>Device Port</name>
+        <type>STRING</type>
+        <default>1028</default>
+      </property>
+      <property>
+        <name>Repeat Interval (ms)</name>
+        <type>STRING</type>
+        <default>100</default>
+      </property>
+      <property>
+        <name>Max Hold Duration (ms)</name>
+        <type>STRING</type>
+        <default>3000</default>
+      </property>
+      <property>
+        <name>Debug Mode</name>
+        <type>LIST</type>
+        <items>
+          <item>Off</item>
+          <item>On</item>
+        </items>
+        <default>Off</default>
+        <readonly>false</readonly>
+      </property>
+      <property>
+        <name>Polling Time</name>
+        <type>RANGED_INTEGER</type>
+        <minimum>3</minimum>
+        <maximum>30</maximum>
+        <default>15</default>
+        <readonly>false</readonly>
+      </property>
+      <property>
+        <name>On Power Off</name>
+        <type>LIST</type>
+        <items>
+          <item>Do Nothing</item>
+          <item>Home</item>
+        </items>
+        <default>Do Nothing</default>
+        <readonly>false</readonly>
+      </property>
+      <property>
+        <name>On Power On</name>
+        <type>LIST</type>
+        <items>
+          <item>Do Nothing</item>
+          <item>Home</item>
+        </items>
+        <default>Do Nothing</default>
+        <readonly>false</readonly>
+      </property>
+      <property>
+        <name>MENU Button</name>
+        <type>LIST</type>
+        <items>
+          <item>Do Nothing</item>
+          <item>Home</item>
+          <item>Back</item>
+          <item>InstantReplay</item>
+          <item>Info</item>
+        </items>
+        <default>Home</default>
+        <readonly>false</readonly>
+      </property>
+      <property>
+        <name>GUIDE Button</name>
+        <type>LIST</type>
+        <items>
+          <item>Do Nothing</item>
+          <item>Home</item>
+          <item>Back</item>
+          <item>InstantReplay</item>
+          <item>Info</item>
+        </items>
+        <default>Home</default>
+        <readonly>false</readonly>
+      </property>
+      <property>
+        <name>INFO Button</name>
+        <type>LIST</type>
+        <items>
+          <item>Do Nothing</item>
+          <item>Home</item>
+          <item>Back</item>
+          <item>InstantReplay</item>
+          <item>Info</item>
+        </items>
+        <default>Info</default>
+        <readonly>false</readonly>
+      </property>
+      <property>
+        <name>CANCEL Button</name>
+        <type>LIST</type>
+        <items>
+          <item>Do Nothing</item>
+          <item>Home</item>
+          <item>Back</item>
+          <item>InstantReplay</item>
+          <item>Info</item>
+        </items>
+        <default>Back</default>
+        <readonly>false</readonly>
+      </property>
+      <property>
+        <name>PVR Button</name>
+        <type>LIST</type>
+        <items>
+          <item>Do Nothing</item>
+          <item>Home</item>
+          <item>Back</item>
+          <item>InstantReplay</item>
+          <item>Info</item>
+        </items>
+        <default>Back</default>
+        <readonly>false</readonly>
+      </property>
+      <property>
+        <name>STAR Button</name>
+        <type>LIST</type>
+        <items>
+          <item>Do Nothing</item>
+          <item>Home</item>
+          <item>Back</item>
+          <item>InstantReplay</item>
+          <item>Info</item>
+        </items>
+        <default>Info</default>
+        <readonly>false</readonly>
+      </property>
+      <property>
+        <name>POUND Button</name>
+        <type>LIST</type>
+        <items>
+          <item>Do Nothing</item>
+          <item>Home</item>
+          <item>Back</item>
+          <item>InstantReplay</item>
+          <item>Info</item>
+        </items>
+        <default>Do Nothing</default>
+        <readonly>false</readonly>
+      </property>
+    </properties>
+    <commands>
+      <command>
+        <name>LaunchApp</name>
+        <description>Launch App PARAM1</description>
+        <params>
+          <param>
+            <name>App</name>
+            <type>CUSTOM_SELECT:SelectAppName</type>
+            <search />
+          </param>
+        </params>
+      </command>
+    </commands>
+    <events />
+    <actions>
+      <action>
+        <name>Rescan for Roku Players</name>
+        <command>Rescan</command>
+      </action>
+      <action>
+        <name>List Discovered Roku Players</name>
+        <command>ListPlayers</command>
+      </action>
+      <action>
+        <name>Add Mini Drivers</name>
+        <command>AddMini</command>
+        <params>
+          <param>
+            <name>Always Add New</name>
+            <type>LIST</type>
+            <items>
+              <item>No</item>
+              <item>Yes</item>
+            </items>
+          </param>
+        </params>
+      </action>
+      <action>
+        <name>Print Available Apps</name>
+        <command>PrintApps</command>
+      </action>
+    </actions>
+  </config>
+  <capabilities>
+    <is_rokutv>false</is_rokutv>
+    <transports>
+      <supported>PLAY, PAUSE, SCAN_FWD, SCAN_REV, DPAD, PRG_BTNS, CH_UP_DN, KEYPAD</supported>
+      <dashboard>
+        <buttons>
+          <button>
+            <id>SCAN_REV</id>
+            <name>SCAN_REV</name>
+            <command>SCAN_REV</command>
+            <type>ROOM</type>
+          </button>
+          <button>
+            <id>PLAY</id>
+            <name>PLAY</name>
+            <command>PLAY</command>
+            <type>ROOM</type>
+          </button>
+          <button>
+            <id>PAUSE</id>
+            <name>PAUSE</name>
+            <command>PAUSE</command>
+            <type>ROOM</type>
+          </button>
+          <button>
+            <id>SCAN_FWD</id>
+            <name>SCAN_FWD</name>
+            <command>SCAN_FWD</command>
+            <type>ROOM</type>
+          </button>
+        </buttons>
+        <default_large>SCAN_REV, PLAY, PAUSE, SCAN_FWD</default_large>
+        <default_small>SCAN_REV, PLAY, PAUSE, SCAN_FWD</default_small>
+      </dashboard>
+      <button_bar>
+        <buttons>
+          <button>
+            <id>HOME</id>
+            <name>Home</name>
+            <command>HOME</command>
+            <type>ROOM</type>
+          </button>
+          <button>
+            <id>INFO</id>
+            <name>Info</name>
+            <command>INFO</command>
+            <type>ROOM</type>
+          </button>
+          <button>
+            <id>REPLAY</id>
+            <name>Instant Replay</name>
+            <command>REPLAY</command>
+            <type>ROOM</type>
+          </button>
+          <button>
+            <id>BACK</id>
+            <name>Back</name>
+            <command>BACK</command>
+            <type>ROOM</type>
+          </button>
+          <button>
+            <id>RECALL</id>
+            <name>Prev</name>
+            <command>RECALL</command>
+            <type>ROOM</type>
+          </button>
+        </buttons>
+        <default_buttons>HOME, INFO, REPLAY, BACK, RECALL</default_buttons>
+      </button_bar>
+    </transports>
+    <list_no_nowplaying>true</list_no_nowplaying>
+    <hide_in_list_nav>False</hide_in_list_nav>
+    <hide_in_media>True</hide_in_media>
+    <digital_audio_support>False</digital_audio_support>
+    <can_scan_media>False</can_scan_media>
+    <ui_selects_device>False</ui_selects_device>
+    <navigator_display_option proxybindingid="5002">
+      <display_icons>
+        <Icon width="70" height="70">controller://driver/roku/icons/device/experience_70.png</Icon>
+        <Icon width="90" height="90">controller://driver/roku/icons/device/experience_90.png</Icon>
+        <Icon width="300" height="300">controller://driver/roku/icons/device/experience_300.png</Icon>
+        <Icon width="512" height="512">controller://driver/roku/icons/device/experience_512.png</Icon>
+        <Icon width="1024" height="1024">controller://driver/roku/icons/device/experience_1024.png</Icon>
+      </display_icons>
+      <translation_url>controller://driver/roku/translations</translation_url>
+    </navigator_display_option>
+    <UI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" proxybindingid="5001">
+      <DeviceIcon>device</DeviceIcon>
+      <BrandingIcon>device</BrandingIcon>
+      <Icons>
+        <IconGroup id="device">
+          <Icon width="70" height="70">controller://driver/roku/icons/apps/experience_70.png</Icon>
+          <Icon width="90" height="90">controller://driver/roku/icons/apps/experience_90.png</Icon>
+          <Icon width="300" height="300">controller://driver/roku/icons/apps/experience_300.png</Icon>
+          <Icon width="512" height="512">controller://driver/roku/icons/apps/experience_512.png</Icon>
+          <Icon width="1024" height="1024">controller://driver/roku/icons/apps/experience_1024.png</Icon>
+        </IconGroup>
+      </Icons>
+      <Tabs>
+        <Tab>
+          <Name>Apps</Name>
+          <ScreenId>Apps</ScreenId>
+          <IconId>device</IconId>
+        </Tab>
+      </Tabs>
+      <FavoriteCommand>
+        <Name>RecallFavorite</Name>
+        <Type>PROTOCOL</Type>
+        <Params>
+          <Param>
+            <Name>id</Name>
+            <Type>FIRST_SELECTED</Type>
+            <Value>id</Value>
+          </Param>
+          <Param>
+            <Name>itemType</Name>
+            <Type>FIRST_SELECTED</Type>
+            <Value>itemType</Value>
+          </Param>
+        </Params>
+      </FavoriteCommand>
+      <Screens>
+        <Screen xsi:type="GridScreenType">
+          <Id>Apps</Id>
+          <DisplayHint>TITLE_OPTIONAL</DisplayHint>
+          <Grid>
+            <ItemDefaultActionProperty>default_action</ItemDefaultActionProperty>
+            <ItemActionIdsProperty>actions_list</ItemActionIdsProperty>
+            <TitleProperty>title</TitleProperty>
+            <ImageProperty targetWidth="290" targetHeight="218">image</ImageProperty>
+            <IsLink>
+              <Property>isLink</Property>
+              <ValidValues>
+                <Value>true</Value>
+              </ValidValues>
+            </IsLink>
+          </Grid>
+          <DataCommand>
+            <Name>BrowseApps</Name>
+            <Type>PROTOCOL</Type>
+            <Params>
+              <Param>
+                <Name>screen</Name>
+                <Type>DEFAULT</Type>
+                <Value>Apps</Value>
+              </Param>
+            </Params>
+          </DataCommand>
+        </Screen>
+      </Screens>
+      <NowPlaying>
+        <Image />
+        <ActionIds />
+        <List>
+          <DefaultAction>Select</DefaultAction>
+          <TitleProperty>title</TitleProperty>
+          <ImageProperty>image</ImageProperty>
+        </List>
+      </NowPlaying>
+      <Actions>
+        <Action>
+          <Id>LaunchApp</Id>
+          <Name>Launch App</Name>
+          <IconId>device</IconId>
+          <Command>
+            <Name>Launch</Name>
+            <Type>PROTOCOL</Type>
+            <Params>
+              <Param>
+                <Name>title</Name>
+                <Type>FIRST_SELECTED</Type>
+                <Value>title</Value>
+              </Param>
+              <Param>
+                <Name>image</Name>
+                <Type>FIRST_SELECTED</Type>
+                <Value>image</Value>
+              </Param>
+              <Param>
+                <Name>id</Name>
+                <Type>FIRST_SELECTED</Type>
+                <Value>id</Value>
+              </Param>
+              <Param>
+                <Name>itemType</Name>
+                <Type>FIRST_SELECTED</Type>
+                <Value>itemType</Value>
+              </Param>
+            </Params>
+          </Command>
+        </Action>
+        <Action>
+          <Id>FavoriteToRoom</Id>
+          <Name>Favorite To Room</Name>
+          <Command>
+            <Name>FavoriteToRoom</Name>
+            <Type>PROTOCOL</Type>
+            <Params>
+              <Param>
+                <Name>screenId</Name>
+                <Type>SYSTEM</Type>
+                <Value>screenId</Value>
+              </Param>
+              <Param>
+                <Name>id</Name>
+                <Type>FIRST_SELECTED</Type>
+                <Value>id</Value>
+              </Param>
+              <Param>
+                <Name>title</Name>
+                <Type>FIRST_SELECTED</Type>
+                <Value>title</Value>
+              </Param>
+              <Param>
+                <Name>itemType</Name>
+                <Type>FIRST_SELECTED</Type>
+                <Value>itemType</Value>
+              </Param>
+            </Params>
+          </Command>
+          <GeneratesRoomFavorite>true</GeneratesRoomFavorite>
+        </Action>
+      </Actions>
+      <Dashboard>
+        <Transport>
+          <Id>Play</Id>
+          <ButtonType>PLAY</ButtonType>
+          <ReleaseCommand>
+            <Name>PLAY</Name>
+            <Type>PROTOCOL</Type>
+          </ReleaseCommand>
+        </Transport>
+        <Transport>
+          <Id>Pause</Id>
+          <ButtonType>PAUSE</ButtonType>
+          <ReleaseCommand>
+            <Name>PAUSE</Name>
+            <Type>PROTOCOL</Type>
+          </ReleaseCommand>
+        </Transport>
+        <Transport>
+          <Id>Stop</Id>
+          <ButtonType>STOP</ButtonType>
+          <ReleaseCommand>
+            <Name>STOP</Name>
+            <Type>PROTOCOL</Type>
+          </ReleaseCommand>
+        </Transport>
+        <Transport>
+          <Id>SkipRev</Id>
+          <ButtonType>SKIP_REV</ButtonType>
+          <ReleaseCommand>
+            <Name>SKIP_REV</Name>
+            <Type>PROTOCOL</Type>
+          </ReleaseCommand>
+        </Transport>
+        <Transport>
+          <Id>SkipFwd</Id>
+          <ButtonType>SKIP_FWD</ButtonType>
+          <ReleaseCommand>
+            <Name>SKIP_FWD</Name>
+            <Type>PROTOCOL</Type>
+          </ReleaseCommand>
+        </Transport>
+      </Dashboard>
+    </UI>
+  </capabilities>
+  <controlmethod>ip</controlmethod>
+  <connections>
+    <connection>
+      <id>5001</id>
+      <type>2</type>
+      <connectionname>Roku</connectionname>
+      <consumer>False</consumer>
+      <linelevel>False</linelevel>
+      <classes>
+        <class>
+          <classname>MediaService</classname>
+        </class>
+      </classes>
+    </connection>
+    <connection>
+      <id>5002</id>
+      <type>2</type>
+      <connectionname>MEDIA_PLAYER</connectionname>
+      <consumer>False</consumer>
+      <linelevel>False</linelevel>
+      <classes>
+        <class>
+          <classname>MEDIA_PLAYER</classname>
+        </class>
+      </classes>
+    </connection>
+    <connection>
+      <id>5003</id>
+      <type>2</type>
+      <connectionname>AVSWITCH</connectionname>
+      <consumer>False</consumer>
+      <linelevel>True</linelevel>
+      <classes>
+        <class>
+          <classname>AVSWITCH</classname>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5001">
+      <id>1001</id>
+      <type>5</type>
+      <connectionname>Video in from Roku OSD</connectionname>
+      <consumer>True</consumer>
+      <linelevel>True</linelevel>
+      <idautobind>1</idautobind>
+      <hidden>True</hidden>
+      <classes>
+        <class>
+          <classname>COMPONENT</classname>
+          <autobind>true</autobind>
+        </class>
+        <class>
+          <classname>HDMI</classname>
+          <autobind>true</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5001">
+      <id>1101</id>
+      <type>5</type>
+      <connectionname>Video in from Roku App Switch</connectionname>
+      <consumer>True</consumer>
+      <linelevel>True</linelevel>
+      <idautobind>10</idautobind>
+      <hidden>True</hidden>
+      <classes>
+        <class>
+          <classname>COMPONENT</classname>
+          <autobind>true</autobind>
+        </class>
+        <class>
+          <classname>HDMI</classname>
+          <autobind>true</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5001">
+      <id>2001</id>
+      <type>5</type>
+      <connectionname>AV Out</connectionname>
+      <consumer>False</consumer>
+      <linelevel>True</linelevel>
+      <classes>
+        <class>
+          <classname>COMPONENT</classname>
+        </class>
+        <class>
+          <classname>HDMI</classname>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5001">
+      <id>3001</id>
+      <type>6</type>
+      <connectionname>Audio In from Roku OSD</connectionname>
+      <consumer>True</consumer>
+      <linelevel>True</linelevel>
+      <idautobind>2</idautobind>
+      <hidden>True</hidden>
+      <classes>
+        <class>
+          <classname>STEREO</classname>
+          <autobind>true</autobind>
+        </class>
+        <class>
+          <classname>DIGITAL_COAX</classname>
+          <autobind>true</autobind>
+        </class>
+        <class>
+          <classname>DIGITAL_OPTICAL</classname>
+          <autobind>true</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5001">
+      <id>3101</id>
+      <type>6</type>
+      <connectionname>Audio In from Roku App Switch</connectionname>
+      <consumer>True</consumer>
+      <linelevel>True</linelevel>
+      <idautobind>20</idautobind>
+      <hidden>True</hidden>
+      <classes>
+        <class>
+          <classname>STEREO</classname>
+          <autobind>true</autobind>
+        </class>
+        <class>
+          <classname>DIGITAL_COAX</classname>
+          <autobind>true</autobind>
+        </class>
+        <class>
+          <classname>DIGITAL_OPTICAL</classname>
+          <autobind>true</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5001">
+      <id>4001</id>
+      <type>6</type>
+      <connectionname>AV Out</connectionname>
+      <consumer>False</consumer>
+      <linelevel>True</linelevel>
+      <classes>
+        <class>
+          <classname>STEREO</classname>
+        </class>
+        <class>
+          <classname>DIGITAL_COAX</classname>
+        </class>
+        <class>
+          <classname>DIGITAL_OPTICAL</classname>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5002">
+      <id>2010</id>
+      <type>5</type>
+      <connectionname>Roku OSD Video Out</connectionname>
+      <consumer>False</consumer>
+      <linelevel>True</linelevel>
+      <idautobind>1</idautobind>
+      <hidden>True</hidden>
+      <classes>
+        <class>
+          <classname>COMPONENT</classname>
+          <autobind>true</autobind>
+        </class>
+        <class>
+          <classname>HDMI</classname>
+          <autobind>true</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5002">
+      <id>4010</id>
+      <type>6</type>
+      <connectionname>Roku OSD Audio Out</connectionname>
+      <consumer>False</consumer>
+      <linelevel>True</linelevel>
+      <idautobind>2</idautobind>
+      <hidden>True</hidden>
+      <classes>
+        <class>
+          <classname>STEREO</classname>
+          <autobind>true</autobind>
+        </class>
+        <class>
+          <classname>DIGITAL_COAX</classname>
+          <autobind>true</autobind>
+        </class>
+        <class>
+          <classname>DIGITAL_OPTICAL</classname>
+          <autobind>true</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>2110</id>
+      <type>5</type>
+      <connectionname>Roku App Switch Video Out</connectionname>
+      <consumer>False</consumer>
+      <linelevel>True</linelevel>
+      <idautobind>10</idautobind>
+      <hidden>True</hidden>
+      <classes>
+        <class>
+          <classname>COMPONENT</classname>
+          <autobind>true</autobind>
+        </class>
+        <class>
+          <classname>HDMI</classname>
+          <autobind>true</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>4110</id>
+      <type>6</type>
+      <connectionname>Roku App Switch Audio Out</connectionname>
+      <consumer>False</consumer>
+      <linelevel>True</linelevel>
+      <idautobind>20</idautobind>
+      <hidden>True</hidden>
+      <classes>
+        <class>
+          <classname>STEREO</classname>
+          <autobind>true</autobind>
+        </class>
+        <class>
+          <classname>DIGITAL_COAX</classname>
+          <autobind>true</autobind>
+        </class>
+        <class>
+          <classname>DIGITAL_OPTICAL</classname>
+          <autobind>true</autobind>
+        </class>
+      </classes>
+    </connection>
+    <!-- App Connections ************************************* -->
+    <connection proxybindingid="5003">
+      <id>3101</id>
+      <type>5</type>
+      <connectionname>App 1</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3102</id>
+      <type>5</type>
+      <connectionname>App 2</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3103</id>
+      <type>5</type>
+      <connectionname>App 3</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3104</id>
+      <type>5</type>
+      <connectionname>App 4</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3105</id>
+      <type>5</type>
+      <connectionname>App 5</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3106</id>
+      <type>5</type>
+      <connectionname>App 6</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3107</id>
+      <type>5</type>
+      <connectionname>App 7</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3108</id>
+      <type>5</type>
+      <connectionname>App 8</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3109</id>
+      <type>5</type>
+      <connectionname>App 9</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3110</id>
+      <type>5</type>
+      <connectionname>App 10</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3111</id>
+      <type>5</type>
+      <connectionname>App 11</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3112</id>
+      <type>5</type>
+      <connectionname>App 12</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3113</id>
+      <type>5</type>
+      <connectionname>App 13</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3114</id>
+      <type>5</type>
+      <connectionname>App 14</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3115</id>
+      <type>5</type>
+      <connectionname>App 15</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3116</id>
+      <type>5</type>
+      <connectionname>App 16</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3117</id>
+      <type>5</type>
+      <connectionname>App 17</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3118</id>
+      <type>5</type>
+      <connectionname>App 18</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3119</id>
+      <type>5</type>
+      <connectionname>App 19</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3120</id>
+      <type>5</type>
+      <connectionname>App 20</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3121</id>
+      <type>5</type>
+      <connectionname>App 21</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3122</id>
+      <type>5</type>
+      <connectionname>App 22</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3123</id>
+      <type>5</type>
+      <connectionname>App 23</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3124</id>
+      <type>5</type>
+      <connectionname>App 24</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+    <connection proxybindingid="5003">
+      <id>3125</id>
+      <type>5</type>
+      <connectionname>App 25</connectionname>
+      <consumer>True</consumer>
+      <linelevel>False</linelevel>
+      <idautobind>33101</idautobind>
+      <classes>
+        <class>
+          <classname>RF_MINI_APP</classname>
+          <autobind>True</autobind>
+        </class>
+      </classes>
+    </connection>
+  </connections>
+</devicedata>
