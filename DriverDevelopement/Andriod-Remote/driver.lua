@@ -8,9 +8,21 @@ DEVICE_IP       = Properties["Device IP"] or "192.168.1.64"
 DEVICE_PORT     = tonumber(Properties["Device Port"]) or 1028
 REPEAT_INTERVAL = tonumber(Properties["Repeat Interval (ms)"]) or 100
 
+-- App launch mappings - customize these for your device
+-- Map app names to the actual commands your device understands
+APP_LAUNCH_COMMANDS = {
+    ["Netflix"]     = "launchApp netflix",
+    ["Hulu"]        = "launchApp hulu", 
+    ["YouTube"]     = "launchApp youtube",
+    ["Disney+"]     = "launchApp disneyplus",
+    ["Prime Video"] = "launchApp primevideo",
+    ["Apple TV+"]   = "launchApp appletv",
+    ["HBO Max"]     = "launchApp hbomax",
+    ["Spotify"]     = "launchApp spotify",
+}
+
 -- Map proxy commands to device keycodes
 map = {
-	
     UP          = "dpadUp",
     DOWN        = "dpadDown",
     LEFT        = "dpadLeft",
@@ -19,8 +31,6 @@ map = {
     CANCEL      = "back",
     HOME        = "home",
     APP_SWITCH  = "recent",
-    --SLEEP       = "lockScreen",
-	--OFF         = "lockScreen",
     VOLUME_UP   = "volumeUp",
     VOLUME_DOWN = "volumeDown",
     VOLUME_MUTE = "volumeNormal",
@@ -53,32 +63,42 @@ local cachedIP = DEVICE_IP
 local cachedPort = DEVICE_PORT
 local cachedRepeatInterval = REPEAT_INTERVAL
 
-
+-- Current app tracking
+local currentApp = nil
 
 function ExecuteCommand(command, params)
-	print("Executing command: " .. tostring(command))
+    print("Executing command: " .. tostring(command))
+    
     if command == "PrintApps" then
-        print("Sending dpadRight command to Roku device via UDP")
+        print("\n=== Available Apps ===")
+        for appName, cmd in pairs(APP_LAUNCH_COMMANDS) do
+            print("  " .. appName .. " -> " .. cmd)
+        end
+        print("======================\n")
     end
 end
+
 -- -----------------------------
 -- Property Changed Handler
 -- -----------------------------
 function OnPropertyChanged(strProperty)
-	print("Property Changed: " .. strProperty)
+    print("Property Changed: " .. strProperty)
     local value = Properties[strProperty]
     
     if strProperty == "Device IP" then
         DEVICE_IP = value or "192.168.1.64"
         cachedIP = DEVICE_IP
+        print("Device IP updated to: " .. cachedIP)
         
     elseif strProperty == "Device Port" then
         DEVICE_PORT = tonumber(value) or 1028
         cachedPort = DEVICE_PORT
+        print("Device Port updated to: " .. cachedPort)
         
     elseif strProperty == "Repeat Interval (ms)" then
         REPEAT_INTERVAL = tonumber(value) or 100
         cachedRepeatInterval = REPEAT_INTERVAL
+        print("Repeat Interval updated to: " .. cachedRepeatInterval)
         
         -- Restart timer with new interval if currently active
         if activeSessionId then
@@ -95,21 +115,59 @@ end
 -- -----------------------------
 function InitUDP()
     if not socket then
-        print("Socket library not available")
+        print("ERROR: Socket library not available")
         return
     end
     if not udp then
         udp = socket.udp()
         udp:settimeout(0)
-        print("UDP socket initialized")
+        print("UDP socket initialized successfully")
+        print("Target: " .. cachedIP .. ":" .. cachedPort)
     end
 end
 
 function SendUDP(command)
-	print("Sending UDP command: " .. command)
+    print("Sending UDP command: " .. command .. " to " .. cachedIP .. ":" .. cachedPort)
     if udp then
-        udp:sendto(command, cachedIP, cachedPort)
+        local bytes, err = udp:sendto(command, cachedIP, cachedPort)
+        if err then
+            print("UDP send error: " .. tostring(err))
+        else
+            print("UDP command sent successfully (" .. tostring(bytes) .. " bytes)")
+        end
+    else
+        print("ERROR: UDP socket not initialized")
     end
+end
+
+-- -----------------------------
+-- App Launch Function
+-- -----------------------------
+function LaunchApp(appName, appId)
+    print("\n" .. string.rep("=", 60))
+    print("LAUNCHING APP")
+    print(string.rep("=", 60))
+    print("App Name: " .. tostring(appName))
+    print("App ID: " .. tostring(appId))
+    print("Device: " .. cachedIP .. ":" .. cachedPort)
+    
+    local launchCommand = "openApp " .. tostring(appName)
+
+    if launchCommand then
+        SendUDP(launchCommand)
+        currentApp = appName
+        C4:UpdateProperty("Current App", appName or "Unknown")
+        print("SUCCESS: App launch command sent")
+    else
+        print("ERROR: No launch command found for app: " .. tostring(appName))
+        print("Available apps:")
+        for name, _ in pairs(APP_LAUNCH_COMMANDS) do
+            print("  - " .. name)
+        end
+        print("\nPlease add this app to APP_LAUNCH_COMMANDS table")
+    end
+    
+    print(string.rep("=", 60) .. "\n")
 end
 
 -- -----------------------------
@@ -163,7 +221,14 @@ end
 -- Driver Lifecycle
 -- -----------------------------
 function OnDriverInit()
-    print("Driver initializing")
+    print("\n" .. string.rep("=", 60))
+    print("Physical Device Driver Initializing")
+    print(string.rep("=", 60))
+    print("Device IP: " .. cachedIP)
+    print("Device Port: " .. cachedPort)
+    print("Repeat Interval: " .. cachedRepeatInterval .. "ms")
+    print(string.rep("=", 60) .. "\n")
+    
     InitUDP()
 end
 
@@ -180,19 +245,49 @@ end
 -- Proxy Commands Handler
 -- -----------------------------
 function ReceivedFromProxy(bindingID, strCommand, tParams)
-	print("ReceivedFromProxy Command Received: " .. strCommand ,bindingID, tParams)
-    	if (strCommand == 'PASSTHROUGH') then -- RokuTV can get PASSTHROUGH on main proxy...
-			strCommand = tParams.PASSTHROUGH_COMMAND
-            print("Extracted PASSTHROUGH command: " .. tostring(strCommand))
-			tParams.PASSTHROUGH_COMMAND = nil
-		end
-    -- Long-press START commands
+    tParams = tParams or {}
+    
+    print("\n" .. string.rep("=", 60))
+    print("PHYSICAL DEVICE - ReceivedFromProxy")
+    print(string.rep("=", 60))
+    print("Binding ID: " .. bindingID)
+    print("Command: " .. strCommand)
+    print("Parameters:")
+    for k, v in pairs(tParams) do
+        print("  " .. k .. " = " .. tostring(v))
+    end
+    print(string.rep("=", 60) .. "\n")
+    
+    -- Handle PASSTHROUGH first
+    if (strCommand == 'PASSTHROUGH') then
+        strCommand = tParams.PASSTHROUGH_COMMAND
+        print("Extracted PASSTHROUGH command: " .. tostring(strCommand))
+        tParams.PASSTHROUGH_COMMAND = nil
+    end
+    
+    -- ===== HANDLE APP LAUNCH =====
+    if (strCommand == 'LAUNCH_APP') then
+        local appName = tParams.APP_NAME
+        local appId = tParams.APP_ID or tParams.CHANNEL_ID
+        
+        print(">>> LAUNCH_APP COMMAND RECEIVED <<<")
+        print("App Name from mini-app: " .. tostring(appName))
+        print("App ID from mini-app: " .. tostring(appId))
+        
+        LaunchApp(appName, appId)
+        return
+    end
+    
+    -- ===== HANDLE LONG-PRESS COMMANDS =====
     if strCommand == "START_UP" then
         StartLongPress("UP")
+        
     elseif strCommand == "START_DOWN" then
         StartLongPress("DOWN")
+        
     elseif strCommand == "START_LEFT" then
         StartLongPress("LEFT")
+        
     elseif strCommand == "START_RIGHT" then
         StartLongPress("RIGHT")
     
@@ -201,11 +296,15 @@ function ReceivedFromProxy(bindingID, strCommand, tParams)
            strCommand == "STOP_LEFT" or strCommand == "STOP_RIGHT" then
         StopLongPress()
     
-    -- Single-press commands
+    -- ===== HANDLE SINGLE-PRESS COMMANDS =====
     else
         local key = map[strCommand]
         if key then
+            print("Mapped command '" .. strCommand .. "' to key: " .. key)
             SendUDP(key)
+        else
+            print("WARNING: Unknown command: " .. strCommand)
+            print("Command not found in map table")
         end
     end
 end

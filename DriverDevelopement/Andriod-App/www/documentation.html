@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Driver Documentation</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Driver Documentation</h1>
+</header>
+<h1 id="media-player---universal-minidriver">Media Player - Universal
+Minidriver</h1>
+<p>Version 29</p>
+<p>This is the Universal Minidriver for Media Player. It can be
+connected to the following player devices:</p>
+<ul>
+<li>Roku Media Player</li>
+<li>Sony TV</li>
+<li>LG 2019 (and later) TVs and projectors</li>
+</ul>
+<p>If you are having trouble using this minidriver with a player on the
+above list, please contact Control4 Technical Support directly.</p>
+<p>If a player with support for direct selection of this service from an
+app is not on the above list, please email
+universal_minidriver_dev@control4.com for help.</p>
+<h2 id="setup">Setup</h2>
+<ul>
+<li><p>Add the driver to the project.</p></li>
+<li><p>Connect the RF_MINI_APP connection to the player(s) you would
+like to use to playback this service.</p></li>
+<li><p>Make sure that the room(s) that the driver is available in show a
+valid audio route for the minidriver (this is required for passthrough
+mode to work).</p></li>
+</ul>
+<p><strong>Note</strong>: If there is no valid audio path, after
+selecting the minidriver, you will not be able to control the media
+player/TV. Confirm you have a valid audio path by selecting the room in
+System Design and verifying audio path is yes for each minidriver.</p>
+<ul>
+<li>Refresh Navigators to show the driver in the room(s) it is now
+available in.</li>
+</ul>
+<p>It is possible for there to be multiple ways for a minidriver to be
+selected in a room. For example, a theater could have a Roku media
+player, a compatible receiver and a smart TV. Only make connections from
+this minidriver to the player(s) you would like to trigger selection of
+this service on.</p>
+<h2 id="using-universal-minidrivers">Using Universal Minidrivers</h2>
+<p>The player device that is used with this driver will determine the
+behavior when selecting this driver. It is often possible for the player
+driver to take over as the selected device in the room. This is likely
+to be present on media player devices and less likely on TV and receiver
+devices, due to the Navigator controls for those devices.</p>
+<p>If a player device supports taking over the selected device in the
+room, then there will be a property on that player driver for
+Passthrough Mode.</p>
+<p>If Passthrough Mode is set to On (or is not present), this minidriver
+will remain as the selected device for the room, but will passthrough
+all control commands through to the player driver to process.</p>
+<p>If Passthrough Mode is set to Off, the player driver will switch the
+player to this service, but will then take over as the selected device
+in the room. The advantage of doing this is that it makes programming on
+the selected device simpler when there are many service minidrivers in a
+project.</p>
+<p>It is not recommended to have minidrivers visible under Listen, as
+the UI control of the selected device requires a TV to be able to
+operate reliably. For using in audio-only secondary zones, it is
+recommended to start the content in the main zone using the minidriver
+and then use the zones page to group rooms together once the required
+content is playing.</p>
+<h2 id="changelog">Changelog</h2>
+<p><strong>Note: Adding support for a specific device does not mean all
+minidrivers are compatible. Please refer to the top of document for
+current compatibility information</strong></p>
+<ul>
+<li>29
+<ul>
+<li>Add new drivers, increased compatability for some existing
+drivers</li>
+<li>Update Plex app ID for Samsung (DRIV-10397)</li>
+<li>Update MLB app ID for Sony (DRIV-11519)</li>
+</ul></li>
+<li>27
+<ul>
+<li>Fix LG ID for NPO (DRIV-10111)</li>
+</ul></li>
+<li>26
+<ul>
+<li>Add support for Loewe and We. by Loewe TVs (SL7)</li>
+</ul></li>
+<li>25
+<ul>
+<li>Add support for 2022 and higher Sony AVRs</li>
+<li>Add support for 2022 and higher Bang &amp; Olufsen TVs</li>
+</ul></li>
+<li>23
+<ul>
+<li>Add support for 2022 and higher Sunbrite TVs</li>
+</ul></li>
+<li>22
+<ul>
+<li>Fix app ID for BBC America (DRIV-6952)</li>
+</ul></li>
+<li>20
+<ul>
+<li>Add support for 2021 and higher Samsung TVs</li>
+</ul></li>
+<li>19
+<ul>
+<li>Fixed issue with Acorn on NVIDIA SHIELD (DRIV-5772)</li>
+<li>Fixed issue with STARZ on NVIDIA SHIELD (DRIV-5844)</li>
+</ul></li>
+<li>18
+<ul>
+<li>Add support for NVIDIA SHIELD</li>
+</ul></li>
+<li>17
+<ul>
+<li>Fixed issue with ABC iView app on Sony televisions</li>
+</ul></li>
+<li>16
+<ul>
+<li>Updated documentation to clarify issue when audio path is
+missing</li>
+</ul></li>
+<li>15
+<ul>
+<li>Add support for Bang &amp; Olufsen TVs (MY2020 and later)</li>
+</ul></li>
+<li>14
+<ul>
+<li>Change Netflix App ID for Dish (DRIV-4130)</li>
+</ul></li>
+<li>13
+<ul>
+<li>Corrected artwork for Blippi (DRIV-3925)</li>
+</ul></li>
+<li>12
+<ul>
+<li>Corrected artwork for Google Play Movies (DRIV-3883)</li>
+</ul></li>
+<li>10
+<ul>
+<li>Add support for LG TVs</li>
+</ul></li>
+<li>8
+<ul>
+<li>Improve error correction</li>
+<li>Update assets to include high res artwork</li>
+</ul></li>
+<li>7
+<ul>
+<li>Add support for Panasonic BD players</li>
+</ul></li>
+<li>6
+<ul>
+<li>Add support for Amazon Fire media players</li>
+</ul></li>
+<li>5
+<ul>
+<li>Add <code>&lt;replaces&gt;</code> tags for Dish upgrade path</li>
+</ul></li>
+<li>4
+<ul>
+<li>Add <code>&lt;replaces&gt;</code> tags for Roku upgrade path</li>
+</ul></li>
+<li>3
+<ul>
+<li>Solve initial Roku upgrade path issue</li>
+</ul></li>
+<li>2
+<ul>
+<li>Remove autobind</li>
+</ul></li>
+<li>1
+<ul>
+<li>Initial release</li>
+</ul></li>
+</ul>
+</body>
+</html>

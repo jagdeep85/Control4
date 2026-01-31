@@ -1,0 +1,74 @@
+<devicedata>
+  <copyright>Copyright 2025 Snap One Home Systems, LLC. All Rights Reserved.</copyright>
+	<manufacturer>Jagdeep Matharu</manufacturer>
+	<name>Android App</name>
+	<model>Android-MiniApp</model>
+	<creator>Jagdeep Matharu</creator>
+	<created>01/29/2026</created>
+	<modified>01/29/2025</modified>
+	<version>1</version>
+	<control>lua_gen</control>
+	<controlmethod>ip</controlmethod>
+	<driver>DriverWorks</driver>
+	<auto_update>true</auto_update>
+	<minimum_auto_update_version>1</minimum_auto_update_version>
+	<minimum_os_version>2.9.0</minimum_os_version>
+	<small image_source="c4z">icons/device_sm.png</small>
+	<large image_source="c4z">icons/device_lg.png</large>
+	<config>
+		<script file="driver.lua" jit="0"/>
+		<documentation file="www/documentation.html"/>
+		<properties>
+			<property>
+				<name>App Name</name>
+				<default>com.youtube</default>
+				<type>STRING</type>
+				<readonly>false</readonly>
+			</property>
+		</properties>
+		<commands>
+		</commands>
+	</config>
+	<proxies>
+		<proxy proxybindingid="5001" name="Media Player" primary="True" image_source="c4z" large_image="icons/device_lg.png" small_image="icons/device_sm.png">media_player</proxy>
+	</proxies>
+	<capabilities>
+		<navigator_display_option proxybindingid="5001">
+			<display_icons>
+				<Icon height="1024" width="1024">controller://driver/android_app/icons/device/experience_512.png</Icon>
+				<Icon height="512" width="512">controller://driver/android_app/icons/device/experience_512.png</Icon>
+				<Icon height="300" width="300">controller://driver/android_app/icons/device/experience_300.png</Icon>
+				<Icon height="90" width="90">controller://driver/android_app/icons/device/experience_90.png</Icon>
+				<Icon height="70" width="70">controller://driver/android_app/icons/device/experience_70.png</Icon>
+			</display_icons>
+		</navigator_display_option>
+	</capabilities>
+	<events>
+	</events>
+	<connections>
+		<connection>
+			<id>5001</id>
+			<type>2</type>
+			<connectionname>MEDIA_PLAYER</connectionname>
+			<consumer>False</consumer>
+			<linelevel>False</linelevel>
+			<classes>
+				<class>
+					<classname>MEDIA_PLAYER</classname>
+				</class>
+			</classes>
+		</connection>
+		<connection>
+			<id>3101</id>
+			<type>5</type>
+			<connectionname>Media Player</connectionname>
+			<consumer>False</consumer>
+			<linelevel>False</linelevel>
+			<classes>
+				<class>
+					<classname>RF_MINI_APP</classname>
+				</class>
+			</classes>
+		</connection>
+	</connections>
+</devicedata>
