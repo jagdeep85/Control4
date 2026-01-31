@@ -180,7 +180,12 @@ end
 -- Proxy Commands Handler
 -- -----------------------------
 function ReceivedFromProxy(bindingID, strCommand, tParams)
-	print("ReceivedFromProxy Command Received: " .. strCommand)
+	print("ReceivedFromProxy Command Received: " .. strCommand ,bindingID, tParams)
+    	if (strCommand == 'PASSTHROUGH') then -- RokuTV can get PASSTHROUGH on main proxy...
+			strCommand = tParams.PASSTHROUGH_COMMAND
+            print("Extracted PASSTHROUGH command: " .. tostring(strCommand))
+			tParams.PASSTHROUGH_COMMAND = nil
+		end
     -- Long-press START commands
     if strCommand == "START_UP" then
         StartLongPress("UP")
