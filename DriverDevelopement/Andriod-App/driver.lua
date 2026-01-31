@@ -5,7 +5,8 @@ JSON                    = require('json')
 UNIVERSAL_APP_VER       = 2
 APP_BINDING             = 3101
 CURRENT_SELECTED_DEVICE = 1000
-CURRENT_AUDIO_PATH      = 1007
+CURRENT_VIDEO_PATH      = 1006  -- VIDEO path (not audio)
+CURRENT_AUDIO_PATH      = 1007  -- Keep for fallback
 
 APP_NAME                = Properties["App Name"] or "Unknown App"
 APP_ID                  = Properties["App ID"] or ""
@@ -15,7 +16,7 @@ PHYSICAL_DEVICE_ID      = tonumber(Properties["Physical Device ID"]) or 0
 LastRoomID = nil
 PendingLaunch = false
 PendingLaunchRoom = nil
-AudioPathUpdated = {}  -- Track which rooms have updated audio paths
+VideoPathUpdated = {}  -- Track which rooms have updated video paths
 
 function formatParams(tParams)
     tParams = tParams or {}
@@ -34,6 +35,7 @@ function OnDriverInit()
     C4:RegisterSystemEvent(C4SystemEvents.OnPIP, 0)
     print("Mini-App Driver Initialized: " .. APP_NAME)
     print("Physical Device ID from property: " .. PHYSICAL_DEVICE_ID)
+    print("Using VIDEO path (variable 1006) for routing")
 end
 
 function OnDriverLateInit()
@@ -86,32 +88,32 @@ function OnWatchedVariableChanged(idDevice, idVariable, strValue)
                 print("Room ID: " .. roomId)
                 print(string.rep("=", 60) .. "\n")
                 
-                -- Mark that we're waiting for audio path update
-                print("⏳ Waiting for audio path update before launching...")
+                -- Mark that we're waiting for video path update
+                print("⏳ Waiting for VIDEO path update before launching...")
                 PendingLaunch = true
                 PendingLaunchRoom = roomId
-                AudioPathUpdated[roomId] = false
+                VideoPathUpdated[roomId] = false
                 
-                -- Build target for this room if needed (will trigger audio path read)
+                -- Trigger video path read
                 EnsureRoomTarget(roomId)
             end
             
-        elseif (idVariable == CURRENT_AUDIO_PATH) then
+        elseif (idVariable == CURRENT_VIDEO_PATH) then
             print("\n" .. string.rep("=", 60))
-            print("Audio path changed for room " .. roomId)
+            print("VIDEO path changed for room " .. roomId)
             print(string.rep("=", 60))
             
             RoomIDRoutes[roomId] = {}
             for id in string.gmatch(strValue or '', '<id>(.-)</id>') do
                 local deviceId = tonumber(id)
                 table.insert(RoomIDRoutes[roomId], deviceId)
-                print("  Route includes device: " .. deviceId)
+                print("  VIDEO route includes device: " .. deviceId)
             end
             
-            -- Mark that audio path has been updated
-            AudioPathUpdated[roomId] = true
+            -- Mark that video path has been updated
+            VideoPathUpdated[roomId] = true
             
-            -- Rebuild target for this room based on the NEW route
+            -- Rebuild target for this room based on the NEW video route
             RoomIDTargets = RoomIDTargets or {}
             local oldTarget = RoomIDTargets[roomId]
             RoomIDTargets[roomId] = nil
@@ -151,11 +153,11 @@ function OnWatchedVariableChanged(idDevice, idVariable, strValue)
                 end
             end
             
-            -- Method 3: Use first device in route (fallback)
+            -- Method 3: Use first device in video route (fallback)
             if (not targetFound and #RoomIDRoutes[roomId] > 0) then
                 local firstDevice = RoomIDRoutes[roomId][1]
                 RoomIDTargets[roomId] = firstDevice
-                print("⚠ Room " .. roomId .. " NEW target (fallback - first in route): device " .. firstDevice)
+                print("⚠ Room " .. roomId .. " NEW target (fallback - first in video route): device " .. firstDevice)
                 if (oldTarget and oldTarget ~= firstDevice) then
                     print("  Changed from device " .. oldTarget .. " to " .. firstDevice)
                 end
@@ -163,18 +165,29 @@ function OnWatchedVariableChanged(idDevice, idVariable, strValue)
             end
             
             if (not targetFound) then
-                print("✗ No target device found for room " .. roomId)
+                print("✗ No target device found in VIDEO route for room " .. roomId)
             end
             
             print(string.rep("=", 60) .. "\n")
             
             -- NOW launch if there's a pending launch for this room
-            if (PendingLaunch and PendingLaunchRoom == roomId and AudioPathUpdated[roomId]) then
-                print(">>> Audio path updated! Executing pending launch for room " .. roomId)
+            if (PendingLaunch and PendingLaunchRoom == roomId and VideoPathUpdated[roomId]) then
+                print(">>> VIDEO path updated! Executing pending launch for room " .. roomId)
                 OnMiniAppSelected(roomId)
                 PendingLaunch = false
                 PendingLaunchRoom = nil
-                AudioPathUpdated[roomId] = false
+                VideoPathUpdated[roomId] = false
+            end
+            
+        elseif (idVariable == CURRENT_AUDIO_PATH) then
+            -- Also monitor audio path for debugging/fallback
+            print("Audio path changed for room " .. roomId .. " (monitored for reference)")
+            local audioDevices = {}
+            for id in string.gmatch(strValue or '', '<id>(.-)</id>') do
+                table.insert(audioDevices, tonumber(id))
+            end
+            if (#audioDevices > 0) then
+                print("  Audio route: " .. table.concat(audioDevices, " → "))
             end
         end
     end
@@ -184,28 +197,28 @@ end
 function EnsureRoomTarget(roomId)
     if (not roomId) then return false end
     
-    -- Always refresh the audio path to get current routing
-    print("Refreshing audio path for room " .. roomId)
+    -- Always refresh the video path to get current routing
+    print("Refreshing VIDEO path for room " .. roomId)
     
     -- Initialize tables if needed
     RoomIDTargets = RoomIDTargets or {}
     RoomIDRoutes = RoomIDRoutes or {}
     
-    -- Get the CURRENT audio path for this room
-    local audioPath = C4:GetDeviceVariable(roomId, CURRENT_AUDIO_PATH) or ''
-    print("Current audio path: " .. audioPath)
+    -- Get the CURRENT VIDEO path for this room
+    local videoPath = C4:GetDeviceVariable(roomId, CURRENT_VIDEO_PATH) or ''
+    print("Current VIDEO path: " .. videoPath)
     
     -- Parse the route
     RoomIDRoutes[roomId] = {}
-    for id in string.gmatch(audioPath, '<id>(.-)</id>') do
+    for id in string.gmatch(videoPath, '<id>(.-)</id>') do
         local deviceId = tonumber(id)
         table.insert(RoomIDRoutes[roomId], deviceId)
-        print("  Device in route: " .. deviceId)
+        print("  Device in VIDEO route: " .. deviceId)
     end
     
     -- Don't set target here - wait for OnWatchedVariableChanged to set it
     -- This ensures we use the LATEST route information
-    print("  Waiting for audio path variable change to set target...")
+    print("  Waiting for VIDEO path variable change to set target...")
     
     return false  -- Indicates we're waiting
 end
@@ -220,20 +233,20 @@ function OnMiniAppSelected(roomId)
     
     local targetDeviceId = nil
     
-    -- Use room-specific target (should be set by audio path change)
+    -- Use room-specific target (should be set by video path change)
     if (RoomIDTargets and roomId and RoomIDTargets[roomId]) then
         targetDeviceId = RoomIDTargets[roomId]
-        print("✓ Using room-specific target: device " .. targetDeviceId)
+        print("✓ Using room-specific target from VIDEO route: device " .. targetDeviceId)
         
-        -- Show the route for debugging
+        -- Show the VIDEO route for debugging
         if (RoomIDRoutes and RoomIDRoutes[roomId]) then
-            print("  Room route: " .. table.concat(RoomIDRoutes[roomId], " → "))
+            print("  VIDEO route: " .. table.concat(RoomIDRoutes[roomId], " → "))
         end
     else
-        print("✗ No room-specific target found!")
+        print("✗ No room-specific target found in VIDEO route!")
         
         if (RoomIDRoutes and roomId and RoomIDRoutes[roomId]) then
-            print("  Route devices available: " .. table.concat(RoomIDRoutes[roomId], ", "))
+            print("  VIDEO route devices available: " .. table.concat(RoomIDRoutes[roomId], ", "))
         end
         
         -- Fallback: Use Physical Device ID only as last resort
@@ -275,7 +288,7 @@ function RegisterRooms()
     RoomIDSources = {}
     RoomIDRoutes = {}
     RoomIDTargets = {}
-    AudioPathUpdated = {}
+    VideoPathUpdated = {}
     
     local roomCount = 0
     for _, _ in pairs(RoomIDs) do
@@ -301,6 +314,7 @@ function RegisterRooms()
     end
     
     print("Physical Device ID property: " .. tostring(PHYSICAL_DEVICE_ID))
+    print("\nUsing VIDEO path (variable " .. CURRENT_VIDEO_PATH .. ") for routing")
     
     -- Register each room
     for roomId, _ in pairs(RoomIDs) do
@@ -310,14 +324,24 @@ function RegisterRooms()
         RoomIDSources[roomId] = tonumber(C4:GetDeviceVariable(roomId, CURRENT_SELECTED_DEVICE)) or 0
         print("  Current source: " .. RoomIDSources[roomId])
         
-        -- Get and parse audio path
-        local audioPath = C4:GetDeviceVariable(roomId, CURRENT_AUDIO_PATH) or ''
+        -- Get and parse VIDEO path
+        local videoPath = C4:GetDeviceVariable(roomId, CURRENT_VIDEO_PATH) or ''
         RoomIDRoutes[roomId] = {}
         
-        for id in string.gmatch(audioPath, '<id>(.-)</id>') do
+        for id in string.gmatch(videoPath, '<id>(.-)</id>') do
             local deviceId = tonumber(id)
             table.insert(RoomIDRoutes[roomId], deviceId)
-            print("  Route device: " .. deviceId)
+            print("  VIDEO route device: " .. deviceId)
+        end
+        
+        -- Also show audio path for comparison
+        local audioPath = C4:GetDeviceVariable(roomId, CURRENT_AUDIO_PATH) or ''
+        local audioDevices = {}
+        for id in string.gmatch(audioPath, '<id>(.-)</id>') do
+            table.insert(audioDevices, tonumber(id))
+        end
+        if (#audioDevices > 0) then
+            print("  Audio route (for reference): " .. table.concat(audioDevices, " → "))
         end
         
         local targetFound = false
@@ -327,49 +351,52 @@ function RegisterRooms()
             for _, id in ipairs(RoomIDRoutes[roomId]) do
                 if (ConnectedDevices[id]) then
                     RoomIDTargets[roomId] = id
-                    print("  ✓ Target (from binding): device " .. id)
+                    print("  ✓ Target (from binding in VIDEO route): device " .. id)
                     targetFound = true
                     break
                 end
             end
         end
         
-        -- Method 2: Try Physical Device ID property (only if in route)
+        -- Method 2: Try Physical Device ID property (only if in VIDEO route)
         if (not targetFound and PHYSICAL_DEVICE_ID and PHYSICAL_DEVICE_ID > 0) then
             for _, id in ipairs(RoomIDRoutes[roomId]) do
                 if (id == PHYSICAL_DEVICE_ID) then
                     RoomIDTargets[roomId] = PHYSICAL_DEVICE_ID
-                    print("  ✓ Target (from property): device " .. PHYSICAL_DEVICE_ID)
+                    print("  ✓ Target (from property in VIDEO route): device " .. PHYSICAL_DEVICE_ID)
                     targetFound = true
                     break
                 end
             end
         end
         
-        -- Method 3: Use first device in route (fallback)
+        -- Method 3: Use first device in VIDEO route (fallback)
         if (not targetFound and #RoomIDRoutes[roomId] > 0) then
             local firstDevice = RoomIDRoutes[roomId][1]
             RoomIDTargets[roomId] = firstDevice
-            print("  ⚠ Target (fallback - first in route): device " .. firstDevice)
+            print("  ⚠ Target (fallback - first in VIDEO route): device " .. firstDevice)
             targetFound = true
         end
         
         if (not targetFound) then
-            print("  ✗ No target found")
+            print("  ✗ No target found in VIDEO route")
         end
         
-        AudioPathUpdated[roomId] = true  -- Initial state is updated
+        VideoPathUpdated[roomId] = true  -- Initial state is updated
         
         -- Register variable listeners
         C4:UnregisterVariableListener(roomId, CURRENT_SELECTED_DEVICE)
         C4:RegisterVariableListener(roomId, CURRENT_SELECTED_DEVICE)
 
+        C4:UnregisterVariableListener(roomId, CURRENT_VIDEO_PATH)
+        C4:RegisterVariableListener(roomId, CURRENT_VIDEO_PATH)
+        
         C4:UnregisterVariableListener(roomId, CURRENT_AUDIO_PATH)
         C4:RegisterVariableListener(roomId, CURRENT_AUDIO_PATH)
     end
     
     print("\nRoom registration complete")
-    print("\nRoom targets summary:")
+    print("\nRoom VIDEO targets summary:")
     for roomId, targetId in pairs(RoomIDTargets) do
         print("  Room " .. roomId .. " → Device " .. targetId)
     end
@@ -392,8 +419,6 @@ function ReceivedFromProxy(idBinding, strCommand, tParams)
         if (roomId) then
             LastRoomID = roomId
             print("Cached Room ID from SELECT_SOURCE: " .. roomId)
-            
-            -- Don't launch here - wait for ON command
         end
     end
 
@@ -428,12 +453,12 @@ function ReceivedFromProxy(idBinding, strCommand, tParams)
             print("Room ID: " .. roomId)
             
             -- DON'T launch immediately - let OnWatchedVariableChanged handle it
-            -- This ensures audio path is updated first
+            -- This ensures VIDEO path is updated first
             print("⏳ Deferring launch to OnWatchedVariableChanged")
-            print("   This ensures audio path is updated with correct route")
+            print("   This ensures VIDEO path is updated with correct route")
             PendingLaunch = true
             PendingLaunchRoom = roomId
-            AudioPathUpdated[roomId] = false
+            VideoPathUpdated[roomId] = false
         else
             print("⏳ No Room ID found - launch will happen via OnWatchedVariableChanged")
             PendingLaunch = true
@@ -450,7 +475,7 @@ function ReceivedFromProxy(idBinding, strCommand, tParams)
         
         if (roomId and RoomIDTargets and RoomIDTargets[roomId]) then
             targetDevice = RoomIDTargets[roomId]
-            print("Using room-specific target: device " .. targetDevice)
+            print("Using room-specific target from VIDEO route: device " .. targetDevice)
         elseif (PHYSICAL_DEVICE_ID and PHYSICAL_DEVICE_ID > 0) then
             targetDevice = PHYSICAL_DEVICE_ID
             print("Using global Physical Device ID: device " .. targetDevice)
