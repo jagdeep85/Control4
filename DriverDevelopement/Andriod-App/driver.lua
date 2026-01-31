@@ -83,22 +83,16 @@ function OnWatchedVariableChanged(idDevice, idVariable, strValue)
                 print("App Name: " .. APP_NAME)
                 print("App ID: " .. APP_ID)
                 print("Room ID: " .. roomId)
-                print("Pending Launch: " .. tostring(PendingLaunch))
                 print(string.rep("=", 60) .. "\n")
                 
-                -- Build target for this room if needed
-                EnsureRoomTarget(roomId)
-                
-                -- Always launch when selected
-                OnMiniAppSelected(roomId)
-                
-                -- Clear pending flag
-                PendingLaunch = false
-                PendingLaunchRoom = nil
+                -- Set pending flag to launch after audio path is confirmed
+                PendingLaunch = true
+                PendingLaunchRoom = roomId
+                print(">>> Pending launch set for room " .. roomId .. " (waiting for audio path confirmation)")
             end
             
         elseif (idVariable == CURRENT_AUDIO_PATH) then
-            print("Audio path changed for room " .. roomId)
+            print("\nAudio path changed for room " .. roomId)
             RoomIDRoutes[roomId] = {}
             for id in string.gmatch(strValue or '', '<id>(.-)</id>') do
                 local deviceId = tonumber(id)
@@ -110,6 +104,8 @@ function OnWatchedVariableChanged(idDevice, idVariable, strValue)
             RoomIDTargets = RoomIDTargets or {}
             RoomIDTargets[roomId] = nil
             
+            local targetFound = false
+            
             -- Method 1: Use configured physical device ID
             if (PHYSICAL_DEVICE_ID and PHYSICAL_DEVICE_ID > 0) then
                 -- Check if physical device is in the route
@@ -117,87 +113,82 @@ function OnWatchedVariableChanged(idDevice, idVariable, strValue)
                     if (id == PHYSICAL_DEVICE_ID) then
                         RoomIDTargets[roomId] = PHYSICAL_DEVICE_ID
                         print("✓ Room " .. roomId .. " target (from property): device " .. PHYSICAL_DEVICE_ID)
-                        
-                        -- Check if there's a pending launch for this room
-                        if (PendingLaunch and PendingLaunchRoom == roomId) then
-                            print(">>> Executing pending launch for room " .. roomId)
-                            OnMiniAppSelected(roomId)
-                            PendingLaunch = false
-                            PendingLaunchRoom = nil
-                        end
-                        return
+                        targetFound = true
+                        break
                     end
                 end
             end
             
-            -- Method 2: Use connected devices on APP_BINDING
-            ConnectedDevices = ConnectedDevices or (C4:GetBoundConsumerDevices(C4:GetProxyDevices(), APP_BINDING))
-            
-            if (ConnectedDevices) then
-                for _, id in ipairs(RoomIDRoutes[roomId]) do
-                    if (ConnectedDevices[id]) then
-                        RoomIDTargets[roomId] = id
-                        print("✓ Room " .. roomId .. " target (from binding): device " .. id)
-                        
-                        -- Check if there's a pending launch for this room
-                        if (PendingLaunch and PendingLaunchRoom == roomId) then
-                            print(">>> Executing pending launch for room " .. roomId)
-                            OnMiniAppSelected(roomId)
-                            PendingLaunch = false
-                            PendingLaunchRoom = nil
+            -- Method 2: Use connected devices on APP_BINDING (if not found yet)
+            if (not targetFound) then
+                ConnectedDevices = ConnectedDevices or (C4:GetBoundConsumerDevices(C4:GetProxyDevices(), APP_BINDING))
+                
+                if (ConnectedDevices) then
+                    for _, id in ipairs(RoomIDRoutes[roomId]) do
+                        if (ConnectedDevices[id]) then
+                            RoomIDTargets[roomId] = id
+                            print("✓ Room " .. roomId .. " target (from binding): device " .. id)
+                            targetFound = true
+                            
+                            -- EXECUTE PENDING LAUNCH IMMEDIATELY after binding target found
+                            if (PendingLaunch and PendingLaunchRoom == roomId) then
+                                print("\n" .. string.rep("=", 60))
+                                print(">>> EXECUTING PENDING LAUNCH (binding target confirmed) <<<")
+                                print("App: " .. APP_NAME)
+                                print("Room: " .. roomId)
+                                print("Target Device: " .. RoomIDTargets[roomId])
+                                print(string.rep("=", 60) .. "\n")
+                                OnMiniAppSelected(roomId)
+                                PendingLaunch = false
+                                PendingLaunchRoom = nil
+                                return
+                            end
+                            
+                            break
                         end
-                        return
                     end
                 end
             end
             
             -- Method 3: Use first device in route (fallback)
-            if (#RoomIDRoutes[roomId] > 0) then
-                local firstDevice = RoomIDRoutes[roomId][1]
-                RoomIDTargets[roomId] = firstDevice
-                print("⚠ Room " .. roomId .. " target (fallback - first in route): device " .. firstDevice)
-                
-                -- Check if there's a pending launch for this room
-                if (PendingLaunch and PendingLaunchRoom == roomId) then
-                    print(">>> Executing pending launch for room " .. roomId)
-                    OnMiniAppSelected(roomId)
-                    PendingLaunch = false
-                    PendingLaunchRoom = nil
+            if (not targetFound) then
+                if (#RoomIDRoutes[roomId] > 0) then
+                    local firstDevice = RoomIDRoutes[roomId][1]
+                    RoomIDTargets[roomId] = firstDevice
+                    print("⚠ Room " .. roomId .. " target (fallback - first in route): device " .. firstDevice)
+                    targetFound = true
+                else
+                    print("✗ No target device found for room " .. roomId)
                 end
-            else
-                print("✗ No target device found for room " .. roomId)
             end
         end
     end
 end
 
--- Ensure a target exists for the given room
+-- Ensure a target exists for the given room by reading LIVE audio path
 function EnsureRoomTarget(roomId)
     if (not roomId) then return false end
     
-    -- If we already have a target, we're good
-    if (RoomIDTargets and RoomIDTargets[roomId]) then
-        print("Room " .. roomId .. " already has target: " .. RoomIDTargets[roomId])
-        return true
-    end
-    
-    print("Building target for room " .. roomId)
+    print("Rebuilding target for room " .. roomId .. " (reading live audio path)")
     
     -- Initialize tables if needed
     RoomIDTargets = RoomIDTargets or {}
     RoomIDRoutes = RoomIDRoutes or {}
     
-    -- Get the current audio path for this room
+    -- ALWAYS read the CURRENT audio path from Control4 (don't use cache)
     local audioPath = C4:GetDeviceVariable(roomId, CURRENT_AUDIO_PATH) or ''
-    print("Audio path for room " .. roomId .. ": " .. audioPath)
+    print("Current audio path for room " .. roomId .. ": " .. audioPath)
     
-    -- Parse the route
+    -- Parse the route fresh
     RoomIDRoutes[roomId] = {}
     for id in string.gmatch(audioPath, '<id>(.-)</id>') do
         local deviceId = tonumber(id)
         table.insert(RoomIDRoutes[roomId], deviceId)
-        print("  Found device in route: " .. deviceId)
+        print("  Device in current route: " .. deviceId)
     end
+    
+    -- Clear old target so we rebuild it fresh
+    RoomIDTargets[roomId] = nil
     
     -- Method 1: Try to use configured physical device ID
     if (PHYSICAL_DEVICE_ID and PHYSICAL_DEVICE_ID > 0) then
@@ -243,23 +234,24 @@ function OnMiniAppSelected(roomId)
     print("App: " .. APP_NAME)
     print("Room: " .. tostring(roomId))
     
-    -- Ensure we have a target for this room
-    local hasTarget = false
+    -- ALWAYS ensure we have a current target for this room
+    -- This handles the case where audio path changed but device selection fires before variable listener updates
     if (roomId) then
-        hasTarget = EnsureRoomTarget(roomId)
+        EnsureRoomTarget(roomId)
     end
     
     local targetDeviceId = nil
     
-    -- Priority 1: Use configured Physical Device ID
-    if (PHYSICAL_DEVICE_ID and PHYSICAL_DEVICE_ID > 0) then
-        targetDeviceId = PHYSICAL_DEVICE_ID
-        print("Using Physical Device ID from property: " .. targetDeviceId)
-    
-    -- Priority 2: Use RoomIDTargets
-    elseif (RoomIDTargets and roomId and RoomIDTargets[roomId]) then
+    -- Priority 1: Use room's current target (updated by audio path listener)
+    -- This respects the actual audio routing from Control4
+    if (RoomIDTargets and roomId and RoomIDTargets[roomId]) then
         targetDeviceId = RoomIDTargets[roomId]
-        print("Using target from RoomIDTargets: " .. targetDeviceId)
+        print("Using target from RoomIDTargets (audio route): " .. targetDeviceId)
+    
+    -- Priority 2: Fallback to configured Physical Device ID only if no room target
+    elseif (PHYSICAL_DEVICE_ID and PHYSICAL_DEVICE_ID > 0) then
+        targetDeviceId = PHYSICAL_DEVICE_ID
+        print("Using Physical Device ID from property (fallback): " .. targetDeviceId)
     end
     
     if (targetDeviceId) then
