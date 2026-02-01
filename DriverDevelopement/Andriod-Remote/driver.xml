@@ -101,84 +101,6 @@
         <default>Home</default>
         <readonly>false</readonly>
       </property>
-      <property>
-        <name>GUIDE Button</name>
-        <type>LIST</type>
-        <items>
-          <item>Do Nothing</item>
-          <item>Home</item>
-          <item>Back</item>
-          <item>InstantReplay</item>
-          <item>Info</item>
-        </items>
-        <default>Home</default>
-        <readonly>false</readonly>
-      </property>
-      <property>
-        <name>INFO Button</name>
-        <type>LIST</type>
-        <items>
-          <item>Do Nothing</item>
-          <item>Home</item>
-          <item>Back</item>
-          <item>InstantReplay</item>
-          <item>Info</item>
-        </items>
-        <default>Info</default>
-        <readonly>false</readonly>
-      </property>
-      <property>
-        <name>CANCEL Button</name>
-        <type>LIST</type>
-        <items>
-          <item>Do Nothing</item>
-          <item>Home</item>
-          <item>Back</item>
-          <item>InstantReplay</item>
-          <item>Info</item>
-        </items>
-        <default>Back</default>
-        <readonly>false</readonly>
-      </property>
-      <property>
-        <name>PVR Button</name>
-        <type>LIST</type>
-        <items>
-          <item>Do Nothing</item>
-          <item>Home</item>
-          <item>Back</item>
-          <item>InstantReplay</item>
-          <item>Info</item>
-        </items>
-        <default>Back</default>
-        <readonly>false</readonly>
-      </property>
-      <property>
-        <name>STAR Button</name>
-        <type>LIST</type>
-        <items>
-          <item>Do Nothing</item>
-          <item>Home</item>
-          <item>Back</item>
-          <item>InstantReplay</item>
-          <item>Info</item>
-        </items>
-        <default>Info</default>
-        <readonly>false</readonly>
-      </property>
-      <property>
-        <name>POUND Button</name>
-        <type>LIST</type>
-        <items>
-          <item>Do Nothing</item>
-          <item>Home</item>
-          <item>Back</item>
-          <item>InstantReplay</item>
-          <item>Info</item>
-        </items>
-        <default>Do Nothing</default>
-        <readonly>false</readonly>
-      </property>
     </properties>
     <commands>
       <command>
@@ -195,28 +117,6 @@
     </commands>
     <events />
     <actions>
-      <action>
-        <name>Rescan for Roku Players</name>
-        <command>Rescan</command>
-      </action>
-      <action>
-        <name>List Discovered Roku Players</name>
-        <command>ListPlayers</command>
-      </action>
-      <action>
-        <name>Add Mini Drivers</name>
-        <command>AddMini</command>
-        <params>
-          <param>
-            <name>Always Add New</name>
-            <type>LIST</type>
-            <items>
-              <item>No</item>
-              <item>Yes</item>
-            </items>
-          </param>
-        </params>
-      </action>
       <action>
         <name>Print Available Apps</name>
         <command>PrintApps</command>

@@ -7,6 +7,7 @@ udp = nil
 DEVICE_IP       = Properties["Device IP"] or "192.168.1.64"
 DEVICE_PORT     = tonumber(Properties["Device Port"]) or 1028
 REPEAT_INTERVAL = tonumber(Properties["Repeat Interval (ms)"]) or 100
+MENU_BUTTON_ACTION = Properties["Menu Button"]
 
 -- App launch mappings - customize these for your device
 -- Map app names to the actual commands your device understands
@@ -27,6 +28,9 @@ map = {
     DOWN        = "dpadDown",
     LEFT        = "dpadLeft",
     RIGHT       = "dpadRight",
+    PULSE_CH_DOWN
+                = "channelDown",
+    PULSE_CH_UP = "channelUp",
     ENTER       = "dpadCenter",
     CANCEL      = "back",
     HOME        = "home",
@@ -62,43 +66,39 @@ local activeSessionId = nil
 local cachedIP = DEVICE_IP
 local cachedPort = DEVICE_PORT
 local cachedRepeatInterval = REPEAT_INTERVAL
+local cachedMenuButtonAction = MENU_BUTTON_ACTION
 
 -- Current app tracking
 local currentApp = nil
 
 function ExecuteCommand(command, params)
-    print("Executing command: " .. tostring(command))
-    
-    if command == "PrintApps" then
-        print("\n=== Available Apps ===")
-        for appName, cmd in pairs(APP_LAUNCH_COMMANDS) do
-            print("  " .. appName .. " -> " .. cmd)
-        end
-        print("======================\n")
-    end
+   
 end
 
 -- -----------------------------
 -- Property Changed Handler
 -- -----------------------------
 function OnPropertyChanged(strProperty)
-    print("Property Changed: " .. strProperty)
+    --print("Property Changed: " .. strProperty)
     local value = Properties[strProperty]
     
     if strProperty == "Device IP" then
         DEVICE_IP = value or "192.168.1.64"
         cachedIP = DEVICE_IP
-        print("Device IP updated to: " .. cachedIP)
+        --print("Device IP updated to: " .. cachedIP)
         
     elseif strProperty == "Device Port" then
         DEVICE_PORT = tonumber(value) or 1028
         cachedPort = DEVICE_PORT
-        print("Device Port updated to: " .. cachedPort)
-        
+        --print("Device Port updated to: " .. cachedPort)
+     elseif strProperty == "Menu " then
+        MENU_BUTTON_ACTION = value
+        cachedMenuButtonAction = MENU_BUTTON_ACTION
+        print("Menu Button Action updated to: " .. cachedMenuButtonAction)
     elseif strProperty == "Repeat Interval (ms)" then
         REPEAT_INTERVAL = tonumber(value) or 100
         cachedRepeatInterval = REPEAT_INTERVAL
-        print("Repeat Interval updated to: " .. cachedRepeatInterval)
+        --print("Repeat Interval updated to: " .. cachedRepeatInterval)
         
         -- Restart timer with new interval if currently active
         if activeSessionId then
@@ -115,28 +115,28 @@ end
 -- -----------------------------
 function InitUDP()
     if not socket then
-        print("ERROR: Socket library not available")
+        --print("ERROR: Socket library not available")
         return
     end
     if not udp then
         udp = socket.udp()
         udp:settimeout(0)
-        print("UDP socket initialized successfully")
-        print("Target: " .. cachedIP .. ":" .. cachedPort)
+        --print("UDP socket initialized successfully")
+        --print("Target: " .. cachedIP .. ":" .. cachedPort)
     end
 end
 
 function SendUDP(command)
-    print("Sending UDP command: " .. command .. " to " .. cachedIP .. ":" .. cachedPort)
+    --print("Sending UDP command: " .. command .. " to " .. cachedIP .. ":" .. cachedPort)
     if udp then
         local bytes, err = udp:sendto(command, cachedIP, cachedPort)
         if err then
-            print("UDP send error: " .. tostring(err))
+            --print("UDP send error: " .. tostring(err))
         else
-            print("UDP command sent successfully (" .. tostring(bytes) .. " bytes)")
+            --print("UDP command sent successfully (" .. tostring(bytes) .. " bytes)")
         end
     else
-        print("ERROR: UDP socket not initialized")
+        --print("ERROR: UDP socket not initialized")
     end
 end
 
@@ -144,12 +144,12 @@ end
 -- App Launch Function
 -- -----------------------------
 function LaunchApp(appName, appId)
-    print("\n" .. string.rep("=", 60))
-    print("LAUNCHING APP")
-    print(string.rep("=", 60))
-    print("App Name: " .. tostring(appName))
-    print("App ID: " .. tostring(appId))
-    print("Device: " .. cachedIP .. ":" .. cachedPort)
+    --print("\n" .. string.rep("=", 60))
+    --print("LAUNCHING APP")
+    --print(string.rep("=", 60))
+    --print("App Name: " .. tostring(appName))
+    --print("App ID: " .. tostring(appId))
+    --print("Device: " .. cachedIP .. ":" .. cachedPort)
     
     local launchCommand = "openApp " .. tostring(appName)
 
@@ -157,17 +157,17 @@ function LaunchApp(appName, appId)
         SendUDP(launchCommand)
         currentApp = appName
         C4:UpdateProperty("Current App", appName or "Unknown")
-        print("SUCCESS: App launch command sent")
+        --print("SUCCESS: App launch command sent")
     else
-        print("ERROR: No launch command found for app: " .. tostring(appName))
-        print("Available apps:")
+        --print("ERROR: No launch command found for app: " .. tostring(appName))
+        --print("Available apps:")
         for name, _ in pairs(APP_LAUNCH_COMMANDS) do
-            print("  - " .. name)
+            --print("  - " .. name)
         end
-        print("\nPlease add this app to APP_LAUNCH_COMMANDS table")
+        --print("\nPlease add this app to APP_LAUNCH_COMMANDS table")
     end
     
-    print(string.rep("=", 60) .. "\n")
+    --print(string.rep("=", 60) .. "\n")
 end
 
 -- -----------------------------
@@ -221,19 +221,19 @@ end
 -- Driver Lifecycle
 -- -----------------------------
 function OnDriverInit()
-    print("\n" .. string.rep("=", 60))
-    print("Physical Device Driver Initializing")
-    print(string.rep("=", 60))
-    print("Device IP: " .. cachedIP)
-    print("Device Port: " .. cachedPort)
-    print("Repeat Interval: " .. cachedRepeatInterval .. "ms")
-    print(string.rep("=", 60) .. "\n")
+    --print("\n" .. string.rep("=", 60))
+    --print("Physical Device Driver Initializing")
+    --print(string.rep("=", 60))
+    --print("Device IP: " .. cachedIP)
+    --print("Device Port: " .. cachedPort)
+    --print("Repeat Interval: " .. cachedRepeatInterval .. "ms")
+    --print(string.rep("=", 60) .. "\n")
     
     InitUDP()
 end
 
 function OnDriverDestroyed()
-    print("Driver shutting down")
+    --print("Driver shutting down")
     StopLongPress()
     if udp then
         udp:close()
@@ -247,16 +247,16 @@ end
 function ReceivedFromProxy(bindingID, strCommand, tParams)
     tParams = tParams or {}
     
-    print("\n" .. string.rep("=", 60))
-    print("PHYSICAL DEVICE - ReceivedFromProxy")
-    print(string.rep("=", 60))
-    print("Binding ID: " .. bindingID)
+    --print("\n" .. string.rep("=", 60))
+    --print("PHYSICAL DEVICE - ReceivedFromProxy")
+    --print(string.rep("=", 60))
+    --print("Binding ID: " .. bindingID)
     print("Command: " .. strCommand)
-    print("Parameters:")
+    --print("Parameters:")
     for k, v in pairs(tParams) do
-        print("  " .. k .. " = " .. tostring(v))
+        --print("  " .. k .. " = " .. tostring(v))
     end
-    print(string.rep("=", 60) .. "\n")
+    --print(string.rep("=", 60) .. "\n")
     
     -- Handle PASSTHROUGH first
     if (strCommand == 'PASSTHROUGH') then
@@ -270,9 +270,9 @@ function ReceivedFromProxy(bindingID, strCommand, tParams)
         local appName = tParams.APP_NAME
         local appId = tParams.APP_ID or tParams.CHANNEL_ID
         
-        print(">>> LAUNCH_APP COMMAND RECEIVED <<<")
-        print("App Name from mini-app: " .. tostring(appName))
-        print("App ID from mini-app: " .. tostring(appId))
+        --print(">>> LAUNCH_APP COMMAND RECEIVED <<<")
+        --print("App Name from mini-app: " .. tostring(appName))
+        --print("App ID from mini-app: " .. tostring(appId))
         
         LaunchApp(appName, appId)
         return
@@ -300,11 +300,18 @@ function ReceivedFromProxy(bindingID, strCommand, tParams)
     else
         local key = map[strCommand]
         if key then
-            print("Mapped command '" .. strCommand .. "' to key: " .. key)
+            --print("Mapped command '" .. strCommand .. "' to key: " .. key)
+            if(strCommand == "MENU") then
+                key = map[cachedMenuButtonAction]
+                if(not key) then
+                    return
+                end
+                print("Using Menu Button Action: " .. cachedMenuButtonAction .. " mapped to key: " .. key)
+            end
             SendUDP(key)
         else
-            print("WARNING: Unknown command: " .. strCommand)
-            print("Command not found in map table")
+            --print("WARNING: Unknown command: " .. strCommand)
+            --print("Command not found in map table")
         end
     end
 end
