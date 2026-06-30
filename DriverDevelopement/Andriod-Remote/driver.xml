@@ -6,7 +6,7 @@
   <model>Formular</model>
   <created>06/20/2025 15:30</created>
   <modified>10/13/2025 13:30</modified>
-  <version>2</version>
+  <version>3</version>
   <control>lua_gen</control>
   <driver>DriverWorks</driver>
   <auto_update>true</auto_update>
@@ -26,7 +26,7 @@
     <properties>
       <property>
         <name>Driver Version</name>
-        <default>2</default>
+        <default>3</default>
         <type>STRING</type>
         <readonly>true</readonly>
       </property>

@@ -67,6 +67,8 @@ local cachedIP = DEVICE_IP
 local cachedPort = DEVICE_PORT
 local cachedRepeatInterval = REPEAT_INTERVAL
 local cachedMenuButtonAction = MENU_BUTTON_ACTION
+local cachedOnPowerOff = Properties["On Power Off"] or "Do Nothing"
+local cachedOnPowerOn  = Properties["On Power On"]  or "Do Nothing"
 
 -- Current app tracking
 local currentApp = nil
@@ -91,10 +93,14 @@ function OnPropertyChanged(strProperty)
         DEVICE_PORT = tonumber(value) or 1028
         cachedPort = DEVICE_PORT
         --print("Device Port updated to: " .. cachedPort)
-     elseif strProperty == "Menu " then
+    elseif strProperty == "Menu " then
         MENU_BUTTON_ACTION = value
         cachedMenuButtonAction = MENU_BUTTON_ACTION
         print("Menu Button Action updated to: " .. cachedMenuButtonAction)
+    elseif strProperty == "On Power Off" then
+        cachedOnPowerOff = value or "Do Nothing"
+    elseif strProperty == "On Power On" then
+        cachedOnPowerOn = value or "Do Nothing"
     elseif strProperty == "Repeat Interval (ms)" then
         REPEAT_INTERVAL = tonumber(value) or 100
         cachedRepeatInterval = REPEAT_INTERVAL
@@ -168,6 +174,23 @@ function LaunchApp(appName, appId)
     end
     
     --print(string.rep("=", 60) .. "\n")
+end
+
+-- -----------------------------
+-- Power Functions
+-- -----------------------------
+function HandlePower(state)
+    if state == "ON" then
+        SendUDP("keycode KEYCODE_WAKEUP")
+        if cachedOnPowerOn == "Home" then
+            C4:SetTimer(500, function() SendUDP("home") end, false)
+        end
+    else
+        SendUDP("keycode KEYCODE_SLEEP")
+        if cachedOnPowerOff == "Home" then
+            C4:SetTimer(500, function() SendUDP("home") end, false)
+        end
+    end
 end
 
 -- -----------------------------
@@ -278,8 +301,16 @@ function ReceivedFromProxy(bindingID, strCommand, tParams)
         return
     end
     
+    -- ===== HANDLE POWER COMMANDS =====
+    if strCommand == "ON" then
+        HandlePower("ON")
+        return
+    elseif strCommand == "OFF" then
+        HandlePower("OFF")
+        return
+
     -- ===== HANDLE LONG-PRESS COMMANDS =====
-    if strCommand == "START_UP" then
+    elseif strCommand == "START_UP" then
         StartLongPress("UP")
         
     elseif strCommand == "START_DOWN" then
