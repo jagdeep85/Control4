@@ -5,13 +5,13 @@
   <model>Ethernet</model>
   <creator>Jagdeep Matharu</creator>
   <created>12/09/2024 1:02 PM</created>
-  <modified>12/09/2024 4:26 PM</modified>
-  <version>1</version>
+  <modified>11/10/2026 7:35 PM</modified>
+  <version>6</version>
   <control>lua_gen</control>
   <driver>DriverWorks</driver>
   <auto_update>true</auto_update>
   <minimum_auto_update_version>1</minimum_auto_update_version>
-  <minimum_os_version>2.9.0</minimum_os_version>
+  <minimum_os_version>2.10.0</minimum_os_version>
   <config>
     <script file="driver.lua"></script>
     <documentation file="www/documentation.rtf" />
@@ -19,12 +19,6 @@
       <property>
         <name>MAC</name>
         <default>C8D3FFB3FE50</default>
-        <type>STRING</type>
-        <readonly>false</readonly>
-      </property>
-      <property>
-        <name>Broadcast IP</name>
-        <default>255.255.255.255</default>
         <type>STRING</type>
         <readonly>false</readonly>
       </property>
